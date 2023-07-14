@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node --max-old-space-size=8192 ./node_modules/.bin/vite",
+    "build": "node --max-old-space-size=8192 ./node_modules/.bin/vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "node --max-old-space-size=8192 ./node_modules/.bin/vite preview"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.11.0",
