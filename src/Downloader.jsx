@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import parseHls from './parseHls';
-import './App.css';
+import './App.css'
 
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
@@ -11,7 +11,7 @@ const Downloader = () => {
   async function startDownload() {
     setAdditionalMessage('STARTING_DOWNLOAD');
     setAdditionalMessage('[INFO] Job started');
-
+    
     try {
       setAdditionalMessage('[INFO] Fetching segments');
       const getSegments = await parseHls({ hlsUrl: url, headers: '' });
@@ -31,29 +31,40 @@ const Downloader = () => {
       await ffmpeg.load();
       setAdditionalMessage('[SUCCESS] ffmpeg loaded');
 
+      setAdditionalMessage('SEGMENT_STARTING_DOWNLOAD');
+
+      const segmentChunks = [];
+      for (let i = 0; i < segments.length; i += 10) {
+        segmentChunks.push(segments.slice(i, i + 10));
+      }
+
       const successSegments = [];
 
-      for (let i = 0; i < segments.length; i++) {
-        setAdditionalMessage(`[INFO] Downloading segment ${i}/${segments.length}`);
-        console.log(`[INFO] Downloading segment ${i}/${segments.length}`);
+      for (let i = 0; i < segmentChunks.length; i++) {
+        setAdditionalMessage(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
+        console.log(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
 
-        const segment = segments[i];
+        const segmentChunk = segmentChunks[i];
 
-        try {
-          const fileId = `${segment.index}.ts`;
-          const getFile = await fetch(segment.uri);
-          if (!getFile.ok) throw new Error('File failed to fetch');
+        await Promise.all(
+          segmentChunk.map(async (segment) => {
+            try {
+              const fileId = `${segment.index}.ts`;
+              const getFile = await fetch(segment.uri);
+              if (!getFile.ok) throw new Error('File failed to fetch');
 
-          ffmpeg.FS(
-            'writeFile',
-            fileId,
-            await fetchFile(await getFile.arrayBuffer())
-          );
-          successSegments.push(fileId);
-          setAdditionalMessage(`[SUCCESS] Segment downloaded ${segment.index}`);
-        } catch (error) {
-          setAdditionalMessage(`[ERROR] Segment download error ${segment.index}`);
-        }
+              ffmpeg.FS(
+                'writeFile',
+                fileId,
+                await fetchFile(await getFile.arrayBuffer())
+              );
+              successSegments.push(fileId);
+              setAdditionalMessage(`[SUCCESS] Segment downloaded ${segment.index}`);
+            } catch (error) {
+              setAdditionalMessage(`[ERROR] Segment download error ${segment.index}`);
+            }
+          })
+        );
       }
 
       successSegments.sort((a, b) => {
@@ -62,49 +73,45 @@ const Downloader = () => {
         return aIndex - bIndex;
       });
 
+      setAdditionalMessage('successSegments', successSegments);
+
       setAdditionalMessage('[INFO] Stitching segments started');
       setAdditionalMessage('SEGMENT_STITCHING');
 
-      try {
-        await ffmpeg.run(
-          '-i',
-          `concat:${successSegments.join('|')}`,
-          '-c',
-          'copy',
-          'output.mp4' // Change output file extension to mp4
-        );
+      await ffmpeg.run(
+        '-i',
+        `concat:${successSegments.join('|')}`,
+        '-c',
+        'copy',
+        'output.mp4' // Change output file extension to mp4
+      );
 
-        setAdditionalMessage('[INFO] Stitching segments finished');
+      setAdditionalMessage('[INFO] Stitching segments finished');
 
-        successSegments.forEach((segment) => {
-          try {
-            ffmpeg.FS('unlink', segment);
-          } catch (_) {}
-        });
-
-        let data;
-
+      successSegments.forEach((segment) => {
         try {
-          data = ffmpeg.FS('readFile', 'output.mp4'); // Change the file name to mp4
-          console.log(data);
-        } catch (_) {
-          throw new Error('Something went wrong while stitching!');
-        }
+          ffmpeg.FS('unlink', segment);
+        } catch (_) {}
+      });
 
-        setAdditionalMessage('');
-        setAdditionalMessage('JOB_FINISHED');
-        setDownloadBlobUrl(
-          URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' })) // Change MIME type to video/mp4
-        );
+      let data;
 
-        setTimeout(() => {
-          ffmpeg.exit();
-        }, 1000);
-      } catch (error) {
-        setAdditionalMessage('');
-        setAdditionalMessage('DOWNLOAD_ERROR');
-        console.log(error.message);
+      try {
+        data = ffmpeg.FS('readFile', 'output.mp4'); // Change the file name to mp4
+        console.log(data);
+      } catch (_) {
+        throw new Error('Something went wrong while stitching!');
       }
+
+      setAdditionalMessage('');
+      setAdditionalMessage('JOB_FINISHED');
+      setDownloadBlobUrl(
+        URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' })) // Change MIME type to video/mp4
+      );
+
+      setTimeout(() => {
+        ffmpeg.exit();
+      }, 1000);
     } catch (error) {
       setAdditionalMessage('');
       setAdditionalMessage('DOWNLOAD_ERROR');

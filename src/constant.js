@@ -8,4 +8,4 @@ export const STARTING_DOWNLOAD = "Download starting";
 export const SEGMENT_STARTING_DOWNLOAD = "Segments downloading";
 export const SEGMENT_STICHING = "Stiching segments";
 export const JOB_FINISHED = "Ready for download";
-export const SEGMENT_CHUNK_SIZE = 10;
+export const SEGMENT_CHUNK_SIZE = 5;
