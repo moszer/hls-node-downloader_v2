@@ -1,38 +1,46 @@
 import React, { useState } from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import parseHls from './parseHls';
-import './App.css'
+import './App.css';
 
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
 
-  async function startDownload() {
-    setAdditionalMessage('STARTING_DOWNLOAD');
-    setAdditionalMessage('[INFO] Job started');
-    
+  const startDownload = async () => {
     try {
+      if (!url) {
+        setAdditionalMessage('Please enter an HLS video URL.');
+        return;
+      }
+
+      setAdditionalMessage('STARTING_DOWNLOAD');
+
+      // Fetch HLS video segments
       setAdditionalMessage('[INFO] Fetching segments');
       const getSegments = await parseHls({ hlsUrl: url, headers: '' });
-      if (getSegments.type !== 'SEGMENT')
-        throw new Error('Invalid segment URL. Please refresh the page.');
+
+      if (getSegments.type !== 'SEGMENT') {
+        setAdditionalMessage('Invalid segment URL. Please refresh the page.');
+        return;
+      }
 
       const segments = getSegments.data.map((s, i) => ({ ...s, index: i }));
 
+      // Initialize ffmpeg
       setAdditionalMessage('[INFO] Initializing ffmpeg');
       const ffmpeg = createFFmpeg({
         mainName: 'main',
-        corePath:
-          'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js',
+        corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js',
         log: false,
       });
 
       await ffmpeg.load();
       setAdditionalMessage('[SUCCESS] ffmpeg loaded');
 
+      // Download segments
       setAdditionalMessage('SEGMENT_STARTING_DOWNLOAD');
-
       const segmentChunks = [];
       for (let i = 0; i < segments.length; i += 10) {
         segmentChunks.push(segments.slice(i, i + 10));
@@ -41,9 +49,7 @@ const Downloader = () => {
       const successSegments = [];
 
       for (let i = 0; i < segmentChunks.length; i++) {
-        setAdditionalMessage(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
-        console.log(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
-
+        setAdditionalMessage(`[INFO] Downloading segment chunks ${i + 1}/${segmentChunks.length}`);
         const segmentChunk = segmentChunks[i];
 
         await Promise.all(
@@ -51,13 +57,12 @@ const Downloader = () => {
             try {
               const fileId = `${segment.index}.ts`;
               const getFile = await fetch(segment.uri);
-              if (!getFile.ok) throw new Error('File failed to fetch');
 
-              ffmpeg.FS(
-                'writeFile',
-                fileId,
-                await fetchFile(await getFile.arrayBuffer())
-              );
+              if (!getFile.ok) {
+                throw new Error('File failed to fetch');
+              }
+
+              ffmpeg.FS('writeFile', fileId, await fetchFile(await getFile.arrayBuffer()));
               successSegments.push(fileId);
               setAdditionalMessage(`[SUCCESS] Segment downloaded ${segment.index}`);
             } catch (error) {
@@ -67,14 +72,8 @@ const Downloader = () => {
         );
       }
 
-      successSegments.sort((a, b) => {
-        const aIndex = parseInt(a.split('.')[0]);
-        const bIndex = parseInt(b.split('.')[0]);
-        return aIndex - bIndex;
-      });
-
-      setAdditionalMessage('successSegments', successSegments);
-
+      // Sort and stitch segments
+      successSegments.sort((a, b) => parseInt(a.split('.')[0]) - parseInt(b.split('.')[0]));
       setAdditionalMessage('[INFO] Stitching segments started');
       setAdditionalMessage('SEGMENT_STITCHING');
 
@@ -88,49 +87,44 @@ const Downloader = () => {
 
       setAdditionalMessage('[INFO] Stitching segments finished');
 
+      // Clean up
       successSegments.forEach((segment) => {
         try {
           ffmpeg.FS('unlink', segment);
         } catch (_) {}
       });
 
-      let data;
-
-      try {
-        data = ffmpeg.FS('readFile', 'output.mp4'); // Change the file name to mp4
-        console.log(data);
-      } catch (_) {
-        throw new Error('Something went wrong while stitching!');
-      }
-
+      // Read and create download URL
+      const data = ffmpeg.FS('readFile', 'output.mp4'); // Change the file name to mp4
       setAdditionalMessage('');
       setAdditionalMessage('JOB_FINISHED');
       setDownloadBlobUrl(
         URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' })) // Change MIME type to video/mp4
       );
 
-      setTimeout(() => {
+      // Exit FFmpeg instance
+      if (ffmpeg.isLoaded()) {
         ffmpeg.exit();
-      }, 5000);
+      }
     } catch (error) {
       setAdditionalMessage('');
       setAdditionalMessage('DOWNLOAD_ERROR');
-      console.log(error.message);
+      console.error(error.message);
     }
-  }
+  };
 
   return (
     <div>
-      <input 
-        className='text-box'
+      <input
+        className="text-box"
         type="text"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="Enter HLS video URL"
       />
-      <div className='button-start-download'>
+      <div className="button-start-download">
         <button onClick={startDownload}>Download HLS Video</button>
-        {additionalMessage && <p className='text-log-download'>{additionalMessage}</p>}
+        {additionalMessage && <p className="text-log-download">{additionalMessage}</p>}
       </div>
 
       {downloadBlobUrl && (
@@ -143,16 +137,12 @@ const Downloader = () => {
             Download now
           </a>
 
-          <button
-            onClick={() => window.location.reload()}
-            className=""
-          >
+          <button onClick={() => window.location.reload()} className="">
             Create new
           </button>
         </div>
       )}
     </div>
-    
   );
 };
 
