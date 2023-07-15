@@ -34,7 +34,7 @@ const App = () => {
         <div className='Sub-text'>
           <div>
             <a href="https://github.com/moszer/hls-node-downloader">
-              <img className='contact-con' src="src/assets/25231.png" alt="Example Image"/>
+              <img className='contact-con' src="./25231.png" alt="Example Image"/>
             </a>
           </div>
           Best Support on: Macos, Windows, Linux
