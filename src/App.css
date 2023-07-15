@@ -69,11 +69,6 @@
   margin: 1em;
 }
 
-/* Styles for the container, adjust as needed */
-.container {
-
-}
-
 /* Styles for the sub-text */
 .Sub-text {
   position: absolute;
@@ -86,5 +81,5 @@
 }
 
 .contact-con {
-  width: 1.5em;
+  width: 0.5em;
 }
