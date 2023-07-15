@@ -7,7 +7,7 @@ import { Crisp } from "crisp-sdk-web";
 const App = () => {
   //set crisp chat
   Crisp.configure("84022d7a-2592-4ce2-9a0d-37a8ba4f01ac");
-  
+
   return (
     <div>
       <TypeAnimation
@@ -30,8 +30,18 @@ const App = () => {
       repeat={Infinity}
     />
       <Downloader />
-
+      <div className='container'>
+        <div className='Sub-text'>
+          <div>
+            <a href="https://github.com/moszer/hls-node-downloader">
+              <img className='contact-con' src="src/assets/25231.png" alt="Example Image"/>
+            </a>
+          </div>
+          Best Support on: Macos, Windows, Linux
+        </div>
+      </div>
     </div>
+    
   );
 };
 

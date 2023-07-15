@@ -137,9 +137,10 @@ const Downloader = () => {
       setAdditionalMessage('');
       setAdditionalMessage('DOWNLOAD_ERROR');
       console.error(error.message);
+      notify(error.message)
     }
-
   };
+
   return (
     <div>
       <div>

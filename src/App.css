@@ -68,3 +68,23 @@
 .Download-con {
   margin: 1em;
 }
+
+/* Styles for the container, adjust as needed */
+.container {
+
+}
+
+/* Styles for the sub-text */
+.Sub-text {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: grey;
+  padding: 10px;
+  font-size: 0.9em;
+}
+
+.contact-con {
+  width: 1.5em;
+}
