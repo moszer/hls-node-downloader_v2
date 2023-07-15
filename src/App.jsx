@@ -1,10 +1,34 @@
 import React from 'react';
 import Downloader from './Downloader.jsx';
+import { TypeAnimation } from 'react-type-animation';
+import { Crisp } from "crisp-sdk-web";
 
 const App = () => {
+  //set crisp chat
+  Crisp.configure("84022d7a-2592-4ce2-9a0d-37a8ba4f01ac");
+  const notify = () => toast("Wow so easy!");
+
   return (
     <div>
-      <h1>HLS Downloaders</h1>
+      <TypeAnimation
+      sequence={[
+        // Same substring at the start will only be typed out once, initially
+        '⚡️ Fast HLS Downloaders ⚡️ ',
+        1000,
+        '⚡️ Fast Dump m3u8 from link ⚡️ ',
+        1000, // wait 1s before replacing "Mice" with "Hamsters"
+        '⚡️ Fast Convert to mp4 ⚡️ ',
+        1000,
+        '⚡️ Fast dumping m3u8 ⚡️',
+        1000,
+        '✅ open source ✅',
+        1000
+      ]}
+      wrapper="span"
+      speed={50}
+      style={{ fontSize: '2em', display: 'inline-block' }}
+      repeat={Infinity}
+    />
       <Downloader />
     </div>
   );

@@ -3,15 +3,32 @@ import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import parseHls from './parseHls';
 import './App.css';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
 
+
+  const notify = (text) => 
+    toast(text, {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
   const startDownload = async () => {
     try {
       if (!url) {
         setAdditionalMessage('Please enter an HLS video URL.');
+        notify('Please enter an HLS video URL.')
         return;
       }
 
@@ -30,6 +47,7 @@ const Downloader = () => {
 
       // Initialize ffmpeg
       setAdditionalMessage('[INFO] Initializing ffmpeg');
+      notify('Initializing ffmpeg')
       const ffmpeg = createFFmpeg({
         mainName: 'main',
         corePath: 'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js',
@@ -37,9 +55,11 @@ const Downloader = () => {
       });
 
       await ffmpeg.load();
+      notify('fmpeg loaded')
       setAdditionalMessage('[SUCCESS] ffmpeg loaded');
 
       // Download segments
+      notify('Start donwloading...')
       setAdditionalMessage('SEGMENT_STARTING_DOWNLOAD');
       const segmentChunks = [];
       for (let i = 0; i < segments.length; i += 10) {
@@ -50,6 +70,7 @@ const Downloader = () => {
 
       for (let i = 0; i < segmentChunks.length; i++) {
         setAdditionalMessage(`[INFO] Downloading segment chunks ${i + 1}/${segmentChunks.length}`);
+        console.log(`[INFO] Downloading segment chunks ${i + 1}/${segmentChunks.length}`);
         const segmentChunk = segmentChunks[i];
 
         await Promise.all(
@@ -69,7 +90,7 @@ const Downloader = () => {
               setAdditionalMessage(`[ERROR] Segment download error ${segment.index}`);
             }
           })
-        );
+        ); 
       }
 
       // Sort and stitch segments
@@ -111,10 +132,13 @@ const Downloader = () => {
       setAdditionalMessage('DOWNLOAD_ERROR');
       console.error(error.message);
     }
-  };
 
+  };
   return (
     <div>
+      <div>
+        <ToastContainer />
+      </div>
       <input
         className="text-box"
         type="text"
@@ -128,7 +152,7 @@ const Downloader = () => {
       </div>
 
       {downloadBlobUrl && (
-        <div className="flex gap-2 items-center">
+        <div className="Download-con">
           <a
             href={downloadBlobUrl}
             download={`hls-downloader-${new Date().toLocaleDateString().replace(/\//g, '-')}.mp4`}
