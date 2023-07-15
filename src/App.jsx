@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Downloader from './Downloader.jsx';
 import { TypeAnimation } from 'react-type-animation';
 import { Crisp } from "crisp-sdk-web";
 
+
 const App = () => {
   //set crisp chat
   Crisp.configure("84022d7a-2592-4ce2-9a0d-37a8ba4f01ac");
-  const notify = () => toast("Wow so easy!");
-
+  
   return (
     <div>
       <TypeAnimation
@@ -30,6 +30,7 @@ const App = () => {
       repeat={Infinity}
     />
       <Downloader />
+
     </div>
   );
 };

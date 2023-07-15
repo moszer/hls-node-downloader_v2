@@ -12,6 +12,10 @@ const Downloader = () => {
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
 
+  //url get from extension
+  const searchParams = new URLSearchParams(window.location.search);
+  const modelParam = searchParams.get('text');
+  console.log(modelParam)
 
   const notify = (text) => 
     toast(text, {
@@ -61,9 +65,11 @@ const Downloader = () => {
       // Download segments
       notify('Start donwloading...')
       setAdditionalMessage('SEGMENT_STARTING_DOWNLOAD');
+
       const segmentChunks = [];
-      for (let i = 0; i < segments.length; i += 10) {
-        segmentChunks.push(segments.slice(i, i + 10));
+      const segmentsPerChunk = 20;
+      for (let i = 0; i < segments.length; i += segmentsPerChunk) {
+        segmentChunks.push(segments.slice(i, i + segmentsPerChunk));
       }
 
       const successSegments = [];
