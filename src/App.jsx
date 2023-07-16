@@ -30,7 +30,6 @@ const App = () => {
       repeat={Infinity}
     />
       <Downloader />
-      <div className='container'>
         <div className='Sub-text'>
           <div>
             <a href="https://github.com/moszer/hls-node-downloader">
@@ -41,7 +40,6 @@ const App = () => {
           </div>
           Best Support on: Macos, Windows, Linux
         </div>
-      </div>
     </div>
     
   );

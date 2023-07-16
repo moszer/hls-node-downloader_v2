@@ -71,14 +71,15 @@
 
 /* Styles for the sub-text */
 .Sub-text {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  color: grey;
-  padding: 10px;
-  font-size: 0.9em;
+  margin: auto;
+  width: 60%;
+  color:#888;
 }
+
 
 .contact-con {
   width: 0.5em;
