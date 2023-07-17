@@ -101,9 +101,18 @@ const Downloader = () => {
       });
 
       setAdditionalMessage('successSegments', successSegments);
-
       setAdditionalMessage('[INFO] Stitching segments started');
       setAdditionalMessage('SEGMENT_STITCHING');
+
+      console.log("SEGMENT")
+
+
+      const testTS = "0.ts|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts"
+
+      const testTS2 = "0.ts|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts"
+
+
+      console.log(successSegments)
 
       await ffmpeg.run(
         '-i',
@@ -121,7 +130,7 @@ const Downloader = () => {
         } catch (_) {}
       });
 
-      const CHUNK_SIZE = 10 * 1024 * 1024; // 2 MB chunk size
+      const CHUNK_SIZE = 1 * 1024 * 1024; // 2 MB chunk size[]
 
       try {
         const file = ffmpeg.FS('readFile', 'output.mp4');
@@ -138,7 +147,7 @@ const Downloader = () => {
 
         console.log(chunks)
 
-        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const blob = new Blob(chunks, { type: 'video/ts' });
         const url = URL.createObjectURL(blob);
         console.log(url);
 
