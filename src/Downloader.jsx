@@ -121,11 +121,10 @@ const Downloader = () => {
         } catch (_) {}
       });
 
-      const CHUNK_SIZE = 1 * 1024 * 1024; // 2 MB chunk size
+      const CHUNK_SIZE = 10 * 1024 * 1024; // 2 MB chunk size
 
       try {
         const file = ffmpeg.FS('readFile', 'output.mp4');
-        console.log(file)
         const fileSize = file.length;
 
         let offset = 0;
@@ -136,6 +135,8 @@ const Downloader = () => {
           chunks.push(chunk);
           offset += CHUNK_SIZE;
         }
+
+        console.log(chunks)
 
         const blob = new Blob(chunks, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
