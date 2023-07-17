@@ -3,17 +3,41 @@ import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import parseHls from './parseHls';
 import './App.css'
 
+import Swal from 'sweetalert2'
+
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
 
+  const infoAlert = (msg) => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    })
+    
+    Toast.fire({
+      icon: 'success',
+      title: msg
+    })
+  };
+
   async function startDownload() {
     setAdditionalMessage('STARTING_DOWNLOAD');
     setAdditionalMessage('[INFO] Job started');
+
+    infoAlert('[INFO] Job started')
     
     try {
       setAdditionalMessage('[INFO] Fetching segments');
+      infoAlert('[INFO] Fetching segments')
       const getSegments = await parseHls({ hlsUrl: url, headers: '' });
       if (getSegments.type !== 'SEGMENT')
         throw new Error('Invalid segment URL. Please refresh the page.');
@@ -21,6 +45,7 @@ const Downloader = () => {
       const segments = getSegments.data.map((s, i) => ({ ...s, index: i }));
 
       setAdditionalMessage('[INFO] Initializing ffmpeg');
+      infoAlert('Initializing ffmpeg...')
       const ffmpeg = createFFmpeg({
         mainName: 'main',
         corePath:
@@ -30,8 +55,10 @@ const Downloader = () => {
 
       await ffmpeg.load();
       setAdditionalMessage('[SUCCESS] ffmpeg loaded');
+      infoAlert('[SUCCESS] ffmpeg loaded')
 
       setAdditionalMessage('SEGMENT_STARTING_DOWNLOAD');
+      infoAlert('STARTING_DOWNLOAD...')
 
       const segmentChunks = [];
       for (let i = 0; i < segments.length; i += 10) {
@@ -94,7 +121,7 @@ const Downloader = () => {
         } catch (_) {}
       });
 
-      const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB chunk size
+      const CHUNK_SIZE = 1 * 1024 * 1024; // 2 MB chunk size
 
       try {
         const file = ffmpeg.FS('readFile', 'output.mp4');
@@ -116,6 +143,7 @@ const Downloader = () => {
 
         setAdditionalMessage('');
         setAdditionalMessage('JOB_FINISHED');
+        infoAlert('JOB_FINISHED')
         setDownloadBlobUrl(url);
 
         setTimeout(() => {
@@ -129,6 +157,8 @@ const Downloader = () => {
     } catch (error) {
       setAdditionalMessage('');
       setAdditionalMessage('DOWNLOAD_ERROR');
+      infoAlert(error.message)
+      infoAlert('DOWNLOAD_ERROR')
       console.log(error.message);
     }
   }
