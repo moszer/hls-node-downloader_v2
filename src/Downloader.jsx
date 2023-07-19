@@ -1,14 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import parseHls from './parseHls';
 import './App.css'
-
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
+
+  function hex_to_ascii(str1) {
+    var hex = str1.toString();
+    var str = '';
+    for (var n = 0; n < hex.length; n += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+    }
+    return str;
+  }
+
+  useEffect(() => {
+    const get_link_m3u8 = window.location.search;
+    const Param_link = new URLSearchParams(get_link_m3u8);
+    const url_ = Param_link.get('url');
+
+    if (url_) {
+      const url_con = hex_to_ascii(url_);
+      console.log(url_con);
+      setUrl(url_con);
+    } else {
+      console.log('[err] not have url');
+    }
+  }, []); // Empty dependency array ensures the code runs only once on component mount
+
 
   const infoAlert = (msg) => {
     const Toast = Swal.mixin({
@@ -50,7 +73,7 @@ const Downloader = () => {
         mainName: 'main',
         corePath:
           'https://unpkg.com/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js',
-        log: false,
+        log: true,
       });
 
       await ffmpeg.load();
@@ -107,20 +130,25 @@ const Downloader = () => {
       console.log("SEGMENT")
 
 
-      const testTS = "0.ts|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts"
+      const files = "0.ts|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts|10.ts"
+      const files2 = "11.ts|12.ts|13.ts|14.ts|15.ts|16.ts|17.ts|18.ts|19.ts|20.ts|21.ts"
+    
+      try {
+        //successSegments.join('|')
+          await ffmpeg.run(
+            '-i',
+            `concat:${successSegments.join('|')}`,
+            '-c',
+            'copy',
+            'output.mp4' // Change output file name as desired
+          );
+      
+        console.log('Output file 1 (output.mp4) created successfully.');
 
-      const testTS2 = "0.ts|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts"
-
-
-      console.log(successSegments)
-
-      await ffmpeg.run(
-        '-i',
-        `concat:${successSegments.join('|')}`,
-        '-c',
-        'copy',
-        'output.mp4' // Change output file extension to mp4
-      );
+      } catch (error) {
+        console.error('Error executing ffmpeg command:', error);
+      }
+      
 
       setAdditionalMessage('[INFO] Stitching segments finished');
 
@@ -130,7 +158,7 @@ const Downloader = () => {
         } catch (_) {}
       });
 
-      const CHUNK_SIZE = 1 * 1024 * 1024; // 2 MB chunk size[]
+      const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB chunk size[]
 
       try {
         const file = ffmpeg.FS('readFile', 'output.mp4');
@@ -147,7 +175,7 @@ const Downloader = () => {
 
         console.log(chunks)
 
-        const blob = new Blob(chunks, { type: 'video/ts' });
+        const blob = new Blob(chunks, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
         console.log(url);
 
@@ -205,6 +233,7 @@ const Downloader = () => {
           </button>
         </div>
       )}
+
     </div>
     
   );
