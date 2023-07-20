@@ -4,10 +4,15 @@ import parseHls from './parseHls';
 import './App.css'
 import Swal from 'sweetalert2';
 
+import { Progress } from 'react-sweet-progress';
+import "react-sweet-progress/lib/style.css";
+
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
   const [url, setUrl] = useState('');
+
+  const [percent_download, setPercentdownload] = useState(0);
 
   function hex_to_ascii(str1) {
     var hex = str1.toString();
@@ -94,6 +99,13 @@ const Downloader = () => {
         setAdditionalMessage(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
         console.log(`[INFO] Downloading segment chunks ${i}/${segmentChunks.length}`);
 
+        //cal percent
+
+        let percent_of_segment = (((i+1)/segmentChunks.length)*100);
+
+        setPercentdownload(percent_of_segment);
+
+        
         const segmentChunk = segmentChunks[i];
 
         await Promise.all(
@@ -210,6 +222,19 @@ const Downloader = () => {
         onChange={(e) => setUrl(e.target.value)}
         placeholder="Enter HLS video URL"
       />
+
+      <Progress
+        className='progress'
+        percent={percent_download}
+        status="error"
+        theme={{
+          error: {
+            symbol: '🚶',
+            color: '#adff2f'
+          }
+        }}
+      />
+
       <div className='button-start-download'>
         <button onClick={startDownload}>Download HLS Video</button>
         {additionalMessage && <p className='text-log-download'>{additionalMessage}</p>}
