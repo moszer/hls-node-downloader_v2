@@ -223,17 +223,21 @@ const Downloader = () => {
         placeholder="Enter HLS video URL"
       />
 
-      <Progress
-        className='progress'
-        percent={percent_download}
-        status="error"
-        theme={{
-          error: {
-            symbol: '🚶',
-            color: '#adff2f'
-          }
-        }}
-      />
+      {percent_download > 0&&
+      (
+          <Progress
+          className='progress'
+          percent={percent_download}
+          status="error"
+          theme={{
+            error: {
+              symbol: '🚶',
+              color: '#adff2f'
+            }
+          }}
+        />
+
+      )}
 
       <div className='button-start-download'>
         <button onClick={startDownload}>Download HLS Video</button>
