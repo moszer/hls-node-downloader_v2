@@ -7,13 +7,20 @@ import Swal from 'sweetalert2';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
+import ReactHlsPlayer from 'react-hls-player';
+
+
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
   const [downloadBlobUrl, setDownloadBlobUrl] = useState('');
+
+  //url .m3u8
   const [url, setUrl] = useState('');
 
   const [percent_download, setPercentdownload] = useState(0);
 
+
+  //convert (get from extention)
   function hex_to_ascii(str1) {
     var hex = str1.toString();
     var str = '';
@@ -22,6 +29,7 @@ const Downloader = () => {
     }
     return str;
   }
+
 
   useEffect(() => {
     const get_link_m3u8 = window.location.search;
@@ -38,6 +46,7 @@ const Downloader = () => {
   }, []); // Empty dependency array ensures the code runs only once on component mount
 
 
+  //sweet alert fuction
   const infoAlert = (msg) => {
     const Toast = Swal.mixin({
       toast: true,
@@ -57,6 +66,7 @@ const Downloader = () => {
     })
   };
 
+  //start converting
   async function startDownload() {
     setAdditionalMessage('STARTING_DOWNLOAD');
     setAdditionalMessage('[INFO] Job started');
@@ -262,6 +272,24 @@ const Downloader = () => {
           </button>
         </div>
       )}
+
+      <div>
+      {url && (
+        <h2>Preview</h2>
+      )}
+      { url && (
+        
+          <ReactHlsPlayer
+          src={url}
+          autoPlay={false}
+          controls={true}
+          width="400px"
+          height="auto"
+          />
+      )}
+
+      </div>
+
 
     </div>
     
