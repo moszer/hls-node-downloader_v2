@@ -7,6 +7,18 @@ import Swal from 'sweetalert2';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
+import 'vidstack/styles/defaults.css'
+import 'vidstack/styles/community-skin/video.css'
+
+import { defineCustomElements } from 'vidstack/elements';
+
+// the `.js` extension is required.
+import 'vidstack/define/media-player.js';
+
+
+defineCustomElements();
+
+
 
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
@@ -270,6 +282,32 @@ const Downloader = () => {
           </button>
         </div>
       )}
+
+      <div>
+      {url && (
+        <h2>Preview</h2>
+      )}
+      { url && (
+        
+        <media-player
+        title="Sprite Fight"
+        src={url}
+        poster="https://image.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/thumbnail.webp?time=268&width=980"
+        thumbnails=''
+        aspect-ratio="16/9"
+        crossorigin
+      >
+        <media-outlet>
+        </media-outlet>
+        <media-community-skin></media-community-skin>
+      </media-player>
+      
+         
+      )}
+
+      </div>
+
+
     </div>
     
   );
