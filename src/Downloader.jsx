@@ -7,8 +7,6 @@ import Swal from 'sweetalert2';
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 
-import ReactHlsPlayer from 'react-hls-player';
-
 
 const Downloader = () => {
   const [additionalMessage, setAdditionalMessage] = useState('');
@@ -272,25 +270,6 @@ const Downloader = () => {
           </button>
         </div>
       )}
-
-      <div>
-      {url && (
-        <h2>Preview</h2>
-      )}
-      { url && (
-        
-          <ReactHlsPlayer
-          src={url}
-          autoPlay={false}
-          controls={true}
-          width="400px"
-          height="auto"
-          />
-      )}
-
-      </div>
-
-
     </div>
     
   );
